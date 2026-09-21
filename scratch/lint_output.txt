@@ -1,0 +1,369 @@
+
+> to-do@0.0.0 lint
+> oxlint
+
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+     ,-[src/context/CallContext.tsx:429:14]
+ 428 | 
+ 429 | export const useCall = (): CallContextType => {
+     :              ^^^^^^^
+ 430 |   const context = useContext(CallContext);
+     `----
+
+  ! eslint(no-unused-vars): Variable 'userAId' is declared but never used. Unused variables should start with a '_'.
+     ,-[scratch/test_step9_ui.js:178:9]
+ 177 |   const tokenB = uBRes.data.token;
+ 178 |   const userAId = uARes.data.user.id;
+     :         ^^^|^^^
+     :            `-- 'userAId' is declared here
+ 179 |   const userBId = uBRes.data.user.id;
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'userBId' is declared but never used. Unused variables should start with a '_'.
+     ,-[scratch/test_step9_ui.js:179:9]
+ 178 |   const userAId = uARes.data.user.id;
+ 179 |   const userBId = uBRes.data.user.id;
+     :         ^^^|^^^
+     :            `-- 'userBId' is declared here
+ 180 | 
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Parameter 'data' is declared but never used. Unused parameters should start with a '_'.
+     ,-[scratch/test_step9_ui.js:271:34]
+ 270 |   let incomingCallReceived = false;
+ 271 |   socketB.once('incoming_call', (data) => {
+     :                                  ^^|^
+     :                                    `-- 'data' is declared here
+ 272 |     incomingCallReceived = true;
+     `----
+  help: Consider removing this parameter.
+
+  ! eslint(no-unused-vars): Variable 'receivedOffer' is declared but never used. Unused variables should start with a '_'.
+     ,-[scratch/test_step4_webrtc_signaling.js:136:9]
+ 135 |   socketA.emit('webrtc_offer', { offer: offerPayload });
+ 136 |   const receivedOffer = await receiveOfferPromise;
+     :         ^^^^^^|^^^^^^
+     :               `-- 'receivedOffer' is declared here
+ 137 |   console.log('✓ User B received WebRTC offer from User A');
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'receivedAnswer' is declared but never used. Unused variables should start with a '_'.
+     ,-[scratch/test_step4_webrtc_signaling.js:153:9]
+ 152 |   socketB.emit('webrtc_answer', { answer: answerPayload });
+ 153 |   const receivedAnswer = await receiveAnswerPromise;
+     :         ^^^^^^^|^^^^^^
+     :                `-- 'receivedAnswer' is declared here
+ 154 |   console.log('✓ User A received WebRTC answer from User B');
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'user1' is declared but never used. Unused variables should start with a '_'.
+    ,-[scratch/test_step7_analytics.js:89:9]
+ 88 |   const token2 = u2Res.data.token;
+ 89 |   const user1 = u1Res.data.user;
+    :         ^^|^^
+    :           `-- 'user1' is declared here
+ 90 |   const user2 = u2Res.data.user;
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'user2' is declared but never used. Unused variables should start with a '_'.
+    ,-[scratch/test_step7_analytics.js:90:9]
+ 89 |   const user1 = u1Res.data.user;
+ 90 |   const user2 = u2Res.data.user;
+    :         ^^|^^
+    :           `-- 'user2' is declared here
+ 91 | 
+    `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'userAId' is declared but never used. Unused variables should start with a '_'.
+     ,-[scratch/test_step8_notifications.js:100:9]
+  99 |   const tokenC = uCRes.data.token;
+ 100 |   const userAId = uARes.data.user.id;
+     :         ^^^|^^^
+     :            `-- 'userAId' is declared here
+ 101 |   const userBId = uBRes.data.user.id;
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Variable 'userCId' is declared but never used. Unused variables should start with a '_'.
+     ,-[scratch/test_step8_notifications.js:102:9]
+ 101 |   const userBId = uBRes.data.user.id;
+ 102 |   const userCId = uCRes.data.user.id;
+     :         ^^^|^^^
+     :            `-- 'userCId' is declared here
+ 103 | 
+     `----
+  help: Consider removing this declaration.
+
+  ! eslint(no-unused-vars): Catch parameter 'err' is caught but never used.
+    ,-[server/services/auth.service.js:48:12]
+ 47 |     return jwt.verify(token, config.jwtSecret);
+ 48 |   } catch (err) {
+    :            ^|^
+    :             `-- 'err' is declared here
+ 49 |     return null;
+    `----
+  help: Consider handling this error.
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/components/studyRoom/FocusTimer.tsx:41:5]
+ 39 |   // Synchronized countdown interval
+ 40 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 41 |     setSecondsLeft(calculateSecondsLeft());
+    :     ^^^^^^^|^^^^^^
+    :            `-- Avoid calling setState() directly within an effect
+ 42 | 
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has missing dependencies: 'calculateSecondsLeft', and 'isRunning'
+    ,-[src/components/studyRoom/FocusTimer.tsx:50:6]
+ 40 |   useEffect(() => {
+ 41 |     setSecondsLeft(calculateSecondsLeft());
+    :                    ^^^^^^^^^^^^^^^^^^^^
+ 42 | 
+ 43 |     if (!isRunning) return;
+    :          ^^^^^^^^^
+ 44 | 
+ 45 |     const interval = setInterval(() => {
+ 46 |       setSecondsLeft(calculateSecondsLeft());
+ 47 |     }, 1000);
+ 48 | 
+ 49 |     return () => clearInterval(interval);
+ 50 |   }, [activeSession.status, activeSession.startedAt, activeSession.pausedAt, activeSession.elapsedSeconds, durationMins]);
+    :      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 51 | 
+    `----
+  help: Either include it or remove the dependency array.
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has missing dependencies: 'getFilteredPool', and 'cardStates'
+     ,-[src/pages/FunBreaksPage.tsx:211:6]
+ 201 |       if (cat === 'win') pool = tinyWinsPool;
+ 202 |       const filtered = getFilteredPool(pool, cat);
+     :                        ^^^^^^^^^^^^^^^
+ 203 | 
+ 204 |       if (filtered.length > 0 && cardStates[cat].itemIndex >= filtered.length) {
+     :                                  ^^^^^^^^^^
+ 205 |         setCardStates((prev) => ({
+ 206 |           ...prev,
+ 207 |           [cat]: { ...prev[cat], itemIndex: 0 },
+ 208 |         }));
+ 209 |       }
+ 210 |     });
+ 211 |   }, [selectedFilter]);
+     :      ^^^^^^^^^^^^^^^^
+ 212 | 
+     `----
+  help: Either include it or remove the dependency array.
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/components/tasks/TaskModal.tsx:94:7]
+ 91 |   // Pre-fill state when editing or reset when adding
+ 92 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 93 |     if (taskToEdit) {
+ 94 |       setTitle(taskToEdit.title);
+    :       ^^^^|^^^
+    :           `-- Avoid calling setState() directly within an effect
+ 95 |       setDescription(taskToEdit.description || '');
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/components/common/TaskCompletionCelebration.tsx:27:7]
+ 22 | 
+ 23 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 24 |     if (!activeCelebration) return;
+ 25 | 
+ 26 |     if (shouldReduceMotion) {
+ 27 |       setPhase('hug');
+    :       ^^^^|^^^
+    :           `-- Avoid calling setState() directly within an effect
+ 28 |     } else {
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has missing dependencies: 'activeCelebration', 'onDismiss', and 'clearCelebration'
+    ,-[src/components/common/TaskCompletionCelebration.tsx:60:6]
+ 23 |   useEffect(() => {
+ 24 |     if (!activeCelebration) return;
+    :          ^^^^^^^^^^^^^^^^^
+ 25 | 
+ 26 |     if (shouldReduceMotion) {
+ 27 |       setPhase('hug');
+ 28 |     } else {
+ 29 |       setPhase('approach');
+ 30 |       // Transition to hug at 0.45s
+ 31 |       const hugTimer = setTimeout(() => {
+ 32 |         setPhase('hug');
+ 33 |       }, 450);
+ 34 | 
+ 35 |       // Auto-dismiss at ~1.35s - 1.45s
+ 36 |       const dismissTimer = setTimeout(() => {
+ 37 |         if (onDismiss) {
+    :             ^^^^^^^^^
+ 38 |           onDismiss();
+ 39 |         } else {
+ 40 |           clearCelebration();
+    :           ^^^^^^^^^^^^^^^^
+ 41 |         }
+ 42 |       }, 1400);
+ 43 | 
+ 44 |       return () => {
+ 45 |         clearTimeout(hugTimer);
+ 46 |         clearTimeout(dismissTimer);
+ 47 |       };
+ 48 |     }
+ 49 | 
+ 50 |     // Auto-dismiss for reduced motion
+ 51 |     const reducedDismissTimer = setTimeout(() => {
+ 52 |       if (onDismiss) {
+ 53 |         onDismiss();
+ 54 |       } else {
+ 55 |         clearCelebration();
+ 56 |       }
+ 57 |     }, 1400);
+ 58 | 
+ 59 |     return () => clearTimeout(reducedDismissTimer);
+ 60 |   }, [activeCelebration?.id, shouldReduceMotion]);
+    :      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 61 | 
+    `----
+  help: Either include it or remove the dependency array.
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+     ,-[src/context/NotificationContext.tsx:255:14]
+ 254 | 
+ 255 | export const useNotifications = (): NotificationContextType => {
+     :              ^^^^^^^^^^^^^^^^
+ 256 |   const context = useContext(NotificationContext);
+     `----
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/context/NotificationContext.tsx:81:5]
+ 79 | 
+ 80 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 81 |     fetchNotifications();
+    :     ^^^^^^^^^|^^^^^^^^
+    :              `-- Avoid calling setState() directly within an effect
+ 82 |   }, [fetchNotifications]);
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/pages/ProgressPage.tsx:61:5]
+ 59 |   // Fetch when range changes
+ 60 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 61 |     fetchAnalytics(range);
+    :     ^^^^^^^|^^^^^^
+    :            `-- Avoid calling setState() directly within an effect
+ 62 |   }, [range, fetchAnalytics]);
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/pages/SettingsPage.tsx:21:19]
+ 19 | 
+ 20 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 21 |     if (me?.name) setName(me.name);
+    :                   ^^^|^^^
+    :                      `-- Avoid calling setState() directly within an effect
+ 22 |     if (me?.examGoal) setGoal(me.examGoal);
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/pages/SettingsPage.tsx:27:52]
+ 24 | 
+ 25 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 26 |     if (settings) {
+ 27 |       if (settings.dailyTargetHours !== undefined) setTargetHours(settings.dailyTargetHours);
+    :                                                    ^^^^^^^|^^^^^^
+    :                                                           `-- Avoid calling setState() directly within an effect
+ 28 |       if (settings.breakReminderInterval !== undefined) setBreakInterval(settings.breakReminderInterval);
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+      ,-[src/context/StudyContext.tsx:1450:14]
+ 1449 | 
+ 1450 | export const useStudy = () => {
+      :              ^^^^^^^^
+ 1451 |   const context = useContext(StudyContext);
+      `----
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+     ,-[src/context/StudyContext.tsx:442:5]
+ 440 | 
+ 441 |   useEffect(() => {
+     :   ^^^^|^^^^
+     :       `-- This is the containing effect
+ 442 |     syncBackendData();
+     :     ^^^^^^^|^^^^^^^
+     :            `-- Avoid calling setState() directly within an effect
+ 443 |   }, []);
+     `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+     ,-[src/context/StudyContext.tsx:454:5]
+ 445 |   // --- Real-time Socket.IO Listeners ---
+ 446 |   useEffect(() => {
+     :   ^^^^|^^^^
+     :       `-- This is the containing effect
+ 447 |     const socket = connectSocket();
+ 448 | 
+ 449 |     const onConnect = () => setSocketConnected(true);
+ 450 |     const onDisconnect = () => setSocketConnected(false);
+ 451 | 
+ 452 |     socket.on('connect', onConnect);
+ 453 |     socket.on('disconnect', onDisconnect);
+ 454 |     setSocketConnected(socket.connected);
+     :     ^^^^^^^^^|^^^^^^^^
+     :              `-- Avoid calling setState() directly within an effect
+ 455 | 
+     `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+  ! react-hooks(exhaustive-deps): React Hook useEffect has a missing dependency: 'syncBackendData'
+     ,-[src/context/StudyContext.tsx:443:6]
+ 441 |   useEffect(() => {
+ 442 |     syncBackendData();
+     :     ^^^^^^^|^^^^^^^
+     :            `-- useEffect uses `syncBackendData` here
+ 443 |   }, []);
+     :      ^^
+ 444 | 
+     `----
+  help: Either include it or remove the dependency array.
+
+Found 26 warnings and 0 errors.
+Finished in 81ms on 127 files with 116 rules using 8 threads.

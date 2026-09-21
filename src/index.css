@@ -1,0 +1,217 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-handwriting: 'Patrick Hand', 'Gaegu', cursive, sans-serif;
+    --font-cute: 'Fredoka', 'Outfit', sans-serif;
+    --font-body: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  body {
+    background-color: #FAF7F2;
+    color: #3F3534;
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Accessible focus indicators with cute pastel outline */
+  :focus-visible {
+    outline: 2px solid #FF8FA3;
+    outline-offset: 2px;
+  }
+
+  /* Readability: inputs and placeholders */
+  input, textarea, select {
+    color: #3F3534;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: #756866 !important;
+    opacity: 1 !important;
+  }
+
+  label {
+    color: #4A3F3D;
+  }
+}
+
+/* Readable Ink Utility Classes */
+.text-ink-primary {
+  color: #3F3534;
+}
+.text-ink-secondary {
+  color: #5F5351;
+}
+.text-ink-muted {
+  color: #756866;
+}
+.text-ink-label {
+  color: #4A3F3D;
+}
+
+/* Typography helper classes */
+.font-handwriting {
+  font-family: 'Patrick Hand', 'Gaegu', cursive, sans-serif;
+}
+
+.font-cute {
+  font-family: 'Fredoka', 'Outfit', sans-serif;
+}
+
+/* Notebook Grid Paper Background */
+.bg-grid-paper {
+  background-color: #FAF7F2;
+  background-image: 
+    linear-gradient(to right, rgba(230, 205, 195, 0.35) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(230, 205, 195, 0.35) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Pink Gingham Pattern for Sidebar */
+.bg-gingham-pink {
+  background-color: #FFF0F3;
+  background-image: 
+    linear-gradient(90deg, rgba(255, 182, 193, 0.28) 50%, transparent 50%),
+    linear-gradient(rgba(255, 182, 193, 0.28) 50%, transparent 50%);
+  background-size: 18px 18px;
+}
+
+/* Subtle Lined Notebook Paper Pattern */
+.bg-lined-paper {
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 27px,
+    rgba(225, 200, 210, 0.45) 28px
+  );
+  line-height: 28px;
+}
+
+/* Paper Card Styles with Hand-Drawn Subtle Offset Shadow */
+.paper-card {
+  background-color: #FFFFFF;
+  border: 2px solid #F1DDD4;
+  border-radius: 1.5rem;
+  box-shadow: 2px 4px 0px rgba(220, 195, 185, 0.5);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.paper-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 3px 6px 0px rgba(215, 185, 175, 0.55);
+}
+
+/* Pastel Card Variations */
+.paper-card-pink {
+  background-color: #FFF2F4;
+  border-color: #F8B4C0;
+  box-shadow: 2px 4px 0px rgba(245, 175, 190, 0.4);
+}
+
+.paper-card-mint {
+  background-color: #F0FDF4;
+  border-color: #BBF7D0;
+  box-shadow: 2px 4px 0px rgba(175, 230, 195, 0.4);
+}
+
+.paper-card-yellow {
+  background-color: #FEFCE8;
+  border-color: #FEF08A;
+  box-shadow: 2px 4px 0px rgba(245, 225, 130, 0.4);
+}
+
+.paper-card-lavender {
+  background-color: #FAF5FF;
+  border-color: #E9D5FF;
+  box-shadow: 2px 4px 0px rgba(225, 195, 250, 0.4);
+}
+
+.paper-card-blue {
+  background-color: #F0F9FF;
+  border-color: #BAE6FD;
+  box-shadow: 2px 4px 0px rgba(175, 215, 245, 0.4);
+}
+
+.paper-card-peach {
+  background-color: #FFF7ED;
+  border-color: #FED7AA;
+  box-shadow: 2px 4px 0px rgba(245, 200, 160, 0.4);
+}
+
+/* Washi Tape Strip Styles */
+.washi-tape {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.88;
+  backdrop-filter: blur(2px);
+  border-left: 2px dashed rgba(255, 255, 255, 0.6);
+  border-right: 2px dashed rgba(255, 255, 255, 0.6);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.washi-tape-pink {
+  background: rgba(255, 182, 193, 0.75);
+  color: #832b45;
+}
+
+.washi-tape-mint {
+  background: rgba(183, 228, 199, 0.75);
+  color: #1b5e3a;
+}
+
+.washi-tape-yellow {
+  background: rgba(254, 240, 138, 0.8);
+  color: #78350f;
+}
+
+.washi-tape-lavender {
+  background: rgba(233, 213, 255, 0.8);
+  color: #581c87;
+}
+
+.washi-tape-blue {
+  background: rgba(186, 230, 253, 0.8);
+  color: #0c4a6e;
+}
+
+/* Cute Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FAF3EC;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #FFCCD5;
+  border-radius: 9999px;
+  border: 2px solid #FAF3EC;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FFAAA6;
+}
+
+/* Touch Target Helper */
+.min-touch-target {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
