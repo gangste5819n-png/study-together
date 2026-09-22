@@ -37,10 +37,13 @@ export const TomorrowPage: React.FC = () => {
     togglePactCommitment,
     activateTodayPact,
     proposeDare,
+    showToast,
   } = useStudy();
 
   const [activeTab, setActiveTab] = useState<'tomorrow' | 'today'>('tomorrow');
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const isPaired = Boolean(partnerInfo?.connected && partnerInfo?.partner);
 
   // Active pact to display based on selected tab
   const displayedPact = activeTab === 'tomorrow' ? tomorrowPact : todayPact || tomorrowPact;
@@ -85,6 +88,14 @@ export const TomorrowPage: React.FC = () => {
     return Sparkles;
   };
 
+  const handleOpenProposeModal = () => {
+    if (!isPaired) {
+      showToast('A study partner connection is required to create Tomorrow Pacts 💕', 'warning');
+      return;
+    }
+    setIsModalOpen(true);
+  };
+
   const handleAddCommitment = (task: {
     title: string;
     category?: PactCategory;
@@ -95,7 +106,7 @@ export const TomorrowPage: React.FC = () => {
     const targetOwnerId =
       task.assignedTo === 'partner' && partnerUserId
         ? partnerUserId
-        : myUserId || 'me';
+        : (myUserId || undefined);
 
     addPactCommitment({
       title: task.title,
@@ -154,6 +165,30 @@ export const TomorrowPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Unpaired Notice Banner */}
+      {!isPaired && (
+        <div className="p-4 rounded-3xl bg-[#FFF2F4] border-2 border-[#F8B4C0] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-2xl bg-white border border-[#F8B4C0] text-[#FF4D6D] flex items-center justify-center shrink-0">
+              <Users className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-[#831843] font-cute">Study Partner Connection Required</p>
+              <p className="text-[11px] text-[#7A6B69]">
+                Tomorrow Pact is a mutual two-person accountability system. Connect with your study partner using a Room Code to unlock mutual nightly pact commitments.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => (window.location.href = '/together')}
+            className="self-start sm:self-center px-4 py-2 rounded-xl bg-[#FF4D6D] hover:bg-[#E63946] text-white text-xs font-bold font-cute transition-colors shrink-0 shadow-xs cursor-pointer"
+          >
+            Connect with Partner 💕
+          </button>
+        </div>
+      )}
 
       {/* Confirmation Widget (Two-Person Confirmation & Mutual Nightly Lock) */}
       <PactConfirmationWidget
@@ -297,7 +332,7 @@ export const TomorrowPage: React.FC = () => {
           {/* Add Commitment Action (only allowed pre-lock) */}
           {!isLocked && (
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={handleOpenProposeModal}
               className="mt-4 w-full py-2.5 rounded-xl bg-[#FFF0F3] hover:bg-[#FFE4E8] border-2 border-[#F8B4C0] text-xs font-extrabold text-[#831843] flex items-center justify-center gap-2 transition-all hover:scale-[1.01] shadow-xs cursor-pointer"
             >
               <Plus className="w-4 h-4 text-[#FF4D6D]" />

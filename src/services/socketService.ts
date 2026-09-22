@@ -224,7 +224,7 @@ export const getSocket = (): Socket => {
   const token = getAuthToken();
 
   socketInstance = io(SOCKET_SERVER_URL, {
-    transports: ['websocket', 'polling'],
+    transports: ['polling', 'websocket'],
     auth: {
       token: token || undefined,
     },

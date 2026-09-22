@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Settings, User, Target, Eye, Palette, Shield, Save } from 'lucide-react';
+import { Settings, User, Target, Eye, Palette, Shield, Save, LogOut, Loader2 } from 'lucide-react';
 import { useStudy } from '../context/StudyContext';
 import { GlassCard } from '../components/common/GlassCard';
 
 export const SettingsPage: React.FC = () => {
-  const { settings, updateSettings, me, partner } = useStudy();
+  const { settings, updateSettings, me, partner, logout } = useStudy();
 
   const [name, setName] = useState(me?.name || '');
   const [goal, setGoal] = useState(me?.examGoal || '');
@@ -16,6 +16,7 @@ export const SettingsPage: React.FC = () => {
   const [canSeeBreaks, setCanSeeBreaks] = useState(settings?.partnerCanSeeBreaks ?? true);
   const [soundEnabled, setSoundEnabled] = useState(settings?.soundEnabled ?? true);
   const [theme, setTheme] = useState(settings?.theme || 'dark-purple');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (me?.name) setName(me.name);
@@ -34,9 +35,10 @@ export const SettingsPage: React.FC = () => {
     }
   }, [settings]);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateSettings({
+    setSaving(true);
+    await updateSettings({
       profileName: name,
       examGoal: goal,
       dailyTargetHours: targetHours,
@@ -47,6 +49,7 @@ export const SettingsPage: React.FC = () => {
       soundEnabled,
       theme,
     });
+    setSaving(false);
   };
 
   return (
@@ -72,15 +75,17 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         <button
-          onClick={handleSave}
-          className="self-start sm:self-center flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#FF4D6D] hover:bg-[#E63946] text-white text-xs font-bold font-cute shadow-sm shadow-pink-200 transition-all hover:scale-102 cursor-pointer"
+          type="submit"
+          form="settings-form"
+          disabled={saving}
+          className="self-start sm:self-center flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#FF4D6D] hover:bg-[#E63946] text-white text-xs font-bold font-cute shadow-sm shadow-pink-200 transition-all hover:scale-102 cursor-pointer disabled:opacity-50"
         >
-          <Save className="w-4 h-4" />
-          <span>Save Changes</span>
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+          <span>{saving ? 'Saving...' : 'Save Changes'}</span>
         </button>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-5">
+      <form id="settings-form" onSubmit={handleSave} className="space-y-5">
         {/* Profile Card */}
         <GlassCard>
           <div className="flex items-center gap-2 pb-3 mb-4 border-b border-[#F1DDD4]">
@@ -283,6 +288,38 @@ export const SettingsPage: React.FC = () => {
             </div>
           </div>
         </GlassCard>
+
+        {/* Account Session & Logout */}
+        <GlassCard>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 className="text-base font-bold text-[#3F3534] font-cute">Account Session</h2>
+              <p className="text-xs text-[#7A6B69]">
+                Signed in as <span className="font-bold text-[#3F3534]">{me.name}</span> ({me.examGoal || 'Study Partner'})
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={logout}
+              className="self-start sm:self-center flex items-center gap-2 px-4 py-2 rounded-2xl bg-rose-50 hover:bg-rose-100 border-2 border-rose-200 text-rose-600 text-xs font-bold font-cute transition-colors cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Log Out</span>
+            </button>
+          </div>
+        </GlassCard>
+
+        {/* Bottom Save Action */}
+        <div className="flex justify-end pt-1">
+          <button
+            type="submit"
+            disabled={saving}
+            className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-[#FF4D6D] hover:bg-[#E63946] text-white text-xs font-bold font-cute shadow-sm shadow-pink-200 transition-all hover:scale-102 cursor-pointer disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            <span>{saving ? 'Saving...' : 'Save Changes'}</span>
+          </button>
+        </div>
       </form>
     </motion.div>
   );

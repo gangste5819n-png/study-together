@@ -16,8 +16,6 @@ import type {
   CommitmentStatus,
 } from '../types';
 import {
-  initialMe,
-  initialPartner,
   initialHealthTasks,
   initialTasks,
   initialActivities,
@@ -153,7 +151,7 @@ interface StudyContextType {
   updateEnergy: (level: number) => void;
   sendEncouragement: (emoji: string) => void;
   nextFunCard: (category: 'dare' | 'icebreaker' | 'teach' | 'win') => void;
-  updateSettings: (newSettings: Partial<UserSettings>) => void;
+  updateSettings: (newSettings: Partial<UserSettings>) => Promise<{ success: boolean; message?: string }>;
   showToast: (message: string, type?: ToastType) => void;
   tomorrowPact: TomorrowPactData | null;
   todayPact: TomorrowPactData | null;
@@ -184,9 +182,47 @@ export interface StudySessionState {
   subject?: string;
 }
 
+export const emptyMe: User = {
+  id: '',
+  name: 'Student',
+  shortName: 'Student',
+  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+  examGoal: 'CDS / MBBS Aspirant',
+  targetStudyMinutes: 480,
+  todayStudyMinutes: 0,
+  currentSubject: '',
+  streak: 0,
+  longestStreak: 0,
+  tasksCompleted: 0,
+  totalTasks: 0,
+  isOnline: false,
+  statusMessage: 'Ready to study ✨',
+  mood: 'ready',
+  energyLevel: 3,
+};
+
+export const emptyPartner: User = {
+  id: '',
+  name: 'No Partner Connected',
+  shortName: 'Partner',
+  avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+  examGoal: 'Connect with a study partner',
+  targetStudyMinutes: 480,
+  todayStudyMinutes: 0,
+  currentSubject: '',
+  streak: 0,
+  longestStreak: 0,
+  tasksCompleted: 0,
+  totalTasks: 0,
+  isOnline: false,
+  statusMessage: 'Connect via Room Code',
+  mood: 'ready',
+  energyLevel: 3,
+};
+
 const defaultStudyContextValue: StudyContextType = {
-  me: initialMe,
-  partner: initialPartner,
+  me: emptyMe,
+  partner: emptyPartner,
   tasks: initialTasks,
   healthTasks: initialHealthTasks,
   activities: initialActivities,
@@ -246,7 +282,7 @@ const defaultStudyContextValue: StudyContextType = {
   updateEnergy: () => {},
   sendEncouragement: () => {},
   nextFunCard: () => {},
-  updateSettings: () => {},
+  updateSettings: async () => ({ success: false }),
   showToast: () => {},
   tomorrowPact: null,
   todayPact: null,
@@ -309,8 +345,8 @@ export const StudyProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   // Backend state
   const [authUser, setAuthUser] = useState<BackendUser | null>(null);
   const [partnerInfo, setPartnerInfo] = useState<PartnerConnectionResponse | null>(null);
-  const [rawMe, setMe] = useState<User>(initialMe);
-  const [partner, setPartner] = useState<User>(initialPartner);
+  const [rawMe, setMe] = useState<User>(emptyMe);
+  const [partner, setPartner] = useState<User>(emptyPartner);
   const [socketConnected, setSocketConnected] = useState<boolean>(false);
   const [activeSession, setActiveSession] = useState<StudySessionState>({
     status: 'idle',
@@ -355,9 +391,13 @@ export const StudyProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       if (tomorrowRes.success && tomorrowRes.data?.pact) {
         setTomorrowPact(tomorrowRes.data.pact);
         setTomorrowLocked(tomorrowRes.data.pact.status === 'locked');
+      } else {
+        setTomorrowPact(null);
       }
       if (todayRes.success && todayRes.data?.pact) {
         setTodayPact(todayRes.data.pact);
+      } else {
+        setTodayPact(null);
       }
       if (daresRes.success && daresRes.data?.dares) {
         setActiveDares(daresRes.data.dares);
@@ -372,24 +412,34 @@ export const StudyProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     if (!isClientAuthenticated()) return;
 
     try {
-      // 1. Fetch user profile
+      // 1. Fetch user profile from authoritative MongoDB backend
       const userRes = await apiClient.auth.getMe();
       if (userRes.success && userRes.data?.user) {
         const bUser = userRes.data.user;
         setAuthUser(bUser);
         setMe((prev) => ({
           ...prev,
+          id: bUser._id,
           name: bUser.name,
           shortName: bUser.name.split(' ')[0],
           examGoal: bUser.examGoal || prev.examGoal,
           streak: bUser.streak !== undefined ? bUser.streak : prev.streak,
           avatar: bUser.avatar || prev.avatar,
           statusMessage: bUser.statusMessage || prev.statusMessage,
+          targetStudyMinutes: bUser.targetStudyMinutes || prev.targetStudyMinutes,
           isOnline: true,
+        }));
+        setSettings((prev) => ({
+          ...prev,
+          profileName: bUser.name,
+          examGoal: bUser.examGoal || prev.examGoal,
+          dailyTargetHours: bUser.targetStudyMinutes
+            ? Math.round((bUser.targetStudyMinutes / 60) * 10) / 10
+            : prev.dailyTargetHours,
         }));
       }
 
-      // 2. Fetch partner info & auto-join room
+      // 2. Fetch partner info & auto-join room if paired
       const partnerRes = await apiClient.partner.getCurrent();
       if (partnerRes.success && partnerRes.data) {
         setPartnerInfo(partnerRes.data);
@@ -412,16 +462,26 @@ export const StudyProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         }
         if (partnerRes.data.partner) {
           const bPartner = partnerRes.data.partner;
-          setPartner((prev) => ({
-            ...prev,
+          setPartner({
+            id: bPartner._id,
             name: bPartner.name,
             shortName: bPartner.name.split(' ')[0],
-            examGoal: bPartner.examGoal || prev.examGoal,
-            avatar: bPartner.avatar || prev.avatar,
-            statusMessage: bPartner.statusMessage || prev.statusMessage,
+            examGoal: bPartner.examGoal || 'Study Partner',
+            avatar: bPartner.avatar || emptyPartner.avatar,
+            statusMessage: bPartner.statusMessage || 'Study Partner',
             isOnline: Boolean(bPartner.isOnline),
-            streak: bPartner.streak !== undefined ? bPartner.streak : prev.streak,
-          }));
+            streak: bPartner.streak !== undefined ? bPartner.streak : 0,
+            longestStreak: bPartner.streak !== undefined ? bPartner.streak : 0,
+            targetStudyMinutes: 480,
+            todayStudyMinutes: 0,
+            currentSubject: '',
+            tasksCompleted: 0,
+            totalTasks: 0,
+            mood: 'ready',
+            energyLevel: 4,
+          });
+        } else {
+          setPartner(emptyPartner);
         }
       }
 
@@ -865,7 +925,12 @@ export const StudyProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     disconnectSocket();
     setAuthUser(null);
     setPartnerInfo(null);
+    setMe(emptyMe);
+    setPartner(emptyPartner);
+    setTomorrowPact(null);
+    setTodayPact(null);
     showToast('Logged out.');
+    window.location.href = '/login';
   };
 
   const createPartnerInvite = async () => {
@@ -1092,16 +1157,26 @@ export const StudyProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   // Step 6: Pact & Dare Actions
   const addPactCommitment = async (commitment: Partial<TomorrowPactCommitment>) => {
+    if (!partnerInfo?.connected) {
+      showToast('A study partner connection is required to create Tomorrow Pacts 💕', 'warning');
+      return;
+    }
     let currentPact = tomorrowPact;
     if (!currentPact?._id) {
       const res = await apiClient.pacts.getTomorrow();
-      if (res.data?.pact) {
+      if (res.success && res.data?.pact) {
         currentPact = res.data.pact;
         setTomorrowPact(currentPact);
+      } else {
+        showToast(res.message || 'Could not load Tomorrow Pact. Make sure your partner connection is active.', 'warning');
+        return;
       }
     }
     const pactId = currentPact?._id;
-    if (!pactId) return;
+    if (!pactId) {
+      showToast('No active Tomorrow Pact found. Please ensure you are paired with a partner.', 'warning');
+      return;
+    }
 
     const res = await apiClient.pacts.addCommitment(pactId, commitment);
     if (res.success && res.data?.pact) {
@@ -1295,15 +1370,49 @@ export const StudyProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     });
   };
 
-  const updateSettings = (newSettings: Partial<UserSettings>) => {
-    setSettings((prev) => ({ ...prev, ...newSettings }));
-    if (newSettings.profileName) {
-      setMe((m) => ({ ...m, name: newSettings.profileName! }));
+  const updateSettings = async (
+    newSettings: Partial<UserSettings>
+  ): Promise<{ success: boolean; message?: string }> => {
+    try {
+      const profilePayload: { name?: string; examGoal?: string; targetStudyMinutes?: number } = {};
+      if (newSettings.profileName) profilePayload.name = newSettings.profileName;
+      if (newSettings.examGoal) profilePayload.examGoal = newSettings.examGoal;
+      if (newSettings.dailyTargetHours !== undefined) {
+        profilePayload.targetStudyMinutes = Math.round(newSettings.dailyTargetHours * 60);
+      }
+
+      const res = await apiClient.auth.updateProfile(profilePayload);
+      if (res.success && res.data?.user) {
+        const updated = res.data.user;
+        setAuthUser(updated);
+        setMe((prev) => ({
+          ...prev,
+          name: updated.name,
+          shortName: updated.name.split(' ')[0],
+          examGoal: updated.examGoal || prev.examGoal,
+          targetStudyMinutes: updated.targetStudyMinutes || prev.targetStudyMinutes,
+        }));
+        setSettings((prev) => {
+          const next = { ...prev, ...newSettings };
+          try {
+            localStorage.setItem('studyTogether_settings_cache', JSON.stringify(next));
+          } catch {
+            // cache write ignore
+          }
+          return next;
+        });
+        showToast('Settings saved successfully.', 'success');
+        return { success: true };
+      } else {
+        const msg = res.message || 'Failed to update settings';
+        showToast(msg, 'error');
+        return { success: false, message: msg };
+      }
+    } catch (err: any) {
+      const msg = err?.message || 'Error updating settings';
+      showToast(msg, 'error');
+      return { success: false, message: msg };
     }
-    if (newSettings.examGoal) {
-      setMe((m) => ({ ...m, examGoal: newSettings.examGoal! }));
-    }
-    showToast('Settings saved successfully.');
   };
 
   const startStudySession = (mode: 'focus' | 'break' = 'focus', durationMins: number = 50, subject?: string) => {

@@ -10,10 +10,16 @@ export const LoginPage: React.FC = () => {
 
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('alex.cds@studytogether.app');
-  const [password, setPassword] = useState('studyhard123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (localStorage.getItem('studyTogether_authToken')) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,35 +42,8 @@ export const LoginPage: React.FC = () => {
           setErrorMessage(res.message || 'Invalid email or password');
         }
       }
-    } catch {
-      // Offline fallback: navigate directly to dashboard
-      navigate('/dashboard');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDemoEntry = async (demoEmail: string, demoName: string) => {
-    setLoading(true);
-    setErrorMessage(null);
-    try {
-      // Try login first; if not registered yet, auto-register
-      const loginRes = await login(demoEmail, 'demoStudy2026!');
-      if (loginRes.success) {
-        navigate('/dashboard');
-        return;
-      }
-
-      const regRes = await register(demoName, demoEmail, 'demoStudy2026!');
-      if (regRes.success) {
-        navigate('/dashboard');
-        return;
-      }
-
-      // Fallback
-      navigate('/dashboard');
-    } catch {
-      navigate('/dashboard');
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Authentication service unreachable. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -151,7 +130,7 @@ export const LoginPage: React.FC = () => {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Alex Sharma"
+                    placeholder="Your Full Name"
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                   />
                 </div>
@@ -169,7 +148,7 @@ export const LoginPage: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="alex@studytogether.app"
+                  placeholder="you@example.com"
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                 />
               </div>
@@ -201,47 +180,12 @@ export const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 flex items-center justify-center gap-2 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold shadow-lg shadow-purple-600/30 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+              className="w-full mt-2 flex items-center justify-center gap-2 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold shadow-lg shadow-purple-600/30 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
             >
               <span>{loading ? 'Please wait...' : isRegisterMode ? 'Create Account' : 'Sign In'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
-
-          {/* Quick Demo Launch Pills */}
-          <div className="mt-6 pt-5 border-t border-white/[0.06]">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 text-center mb-3">
-              One-Click Demo Entry
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => handleDemoEntry('alex.cds@studytogether.app', 'Alex')}
-                className="p-2.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 text-xs font-semibold text-purple-200 text-center transition-colors"
-              >
-                Enter as Alex (CDS)
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleDemoEntry('priya.mbbs@studytogether.app', 'Priya')}
-                className="p-2.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 text-xs font-semibold text-cyan-200 text-center transition-colors"
-              >
-                Enter as Priya (MBBS)
-              </button>
-            </div>
-          </div>
-
-          {/* Guest Direct Entry */}
-          <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={() => navigate('/dashboard')}
-              className="text-xs text-slate-400 hover:text-purple-300 font-medium transition-colors"
-            >
-              Continue without signing in →
-            </button>
-          </div>
         </div>
 
         {/* Small Privacy Guarantee Footer */}

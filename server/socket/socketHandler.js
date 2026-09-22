@@ -62,19 +62,27 @@ const userSocketsMap = new Map();
  * Supports room-based partner pairing, real-time study events, online presence, and WebRTC signaling hooks
  */
 export const initSocket = (httpServer) => {
-  const allowedOrigins = config.isProduction
-    ? [...config.clientOrigins]
-    : [
-        ...config.clientOrigins,
-        config.clientOrigin,
-        'http://localhost:5173',
-        'http://127.0.0.1:5173',
-        'http://localhost:3000',
-      ];
+  const allowedOrigins = [
+    ...config.clientOrigins,
+    config.clientOrigin.replace(/\/+$/, ''),
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000',
+  ];
 
   const io = new Server(httpServer, {
     cors: {
-      origin: allowedOrigins,
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        const normalized = origin.replace(/\/+$/, '');
+        if (allowedOrigins.some((allowed) => allowed === normalized)) {
+          return callback(null, true);
+        }
+        if (config.isProduction) {
+          return callback(new Error('Origin not allowed by CORS policy.'));
+        }
+        return callback(null, true);
+      },
       methods: ['GET', 'POST'],
       credentials: true,
     },

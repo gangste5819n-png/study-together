@@ -7,6 +7,9 @@ import { Layout } from './components/layout/Layout';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { PageLoader } from './components/common/LoadingStates';
 
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { isClientAuthenticated } from './services/apiClient';
+
 // Static load for immediate entry pages
 import { DashboardPage } from './pages/DashboardPage';
 import { TasksPage } from './pages/TasksPage';
@@ -30,6 +33,8 @@ const SettingsPage = React.lazy(() =>
 );
 
 export function App() {
+  const authenticated = isClientAuthenticated();
+
   return (
     <ErrorBoundary>
       <StudyProvider>
@@ -38,25 +43,36 @@ export function App() {
           <BrowserRouter>
             <Suspense fallback={<PageLoader message="Loading study companion..." />}>
               <Routes>
-                {/* Real Authentication Route */}
-                <Route path="/login" element={<LoginPage />} />
+                {/* Authentication Route: if already logged in, go straight to dashboard */}
+                <Route
+                  path="/login"
+                  element={authenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />}
+                />
 
-                {/* Authenticated Dashboard / Study Room Routes */}
-                <Route element={<Layout />}>
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/tasks" element={<TasksPage />} />
-                  <Route path="/together" element={<TogetherPage />} />
-                  <Route path="/study-room" element={<StudyRoomPage />} />
-                  <Route path="/progress" element={<ProgressPage />} />
-                  <Route path="/streaks" element={<StreaksPage />} />
-                  <Route path="/tomorrow" element={<TomorrowPage />} />
-                  <Route path="/fun" element={<FunBreaksPage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
+                {/* Protected Authenticated Routes */}
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<Layout />}>
+                    <Route path="/dashboard" element={<DashboardPage />} />
+                    <Route path="/tasks" element={<TasksPage />} />
+                    <Route path="/together" element={<TogetherPage />} />
+                    <Route path="/study-room" element={<StudyRoomPage />} />
+                    <Route path="/progress" element={<ProgressPage />} />
+                    <Route path="/streaks" element={<StreaksPage />} />
+                    <Route path="/tomorrow" element={<TomorrowPage />} />
+                    <Route path="/fun" element={<FunBreaksPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                  </Route>
                 </Route>
 
                 {/* Fallback Redirects */}
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                <Route
+                  path="/"
+                  element={<Navigate to={authenticated ? '/dashboard' : '/login'} replace />}
+                />
+                <Route
+                  path="*"
+                  element={<Navigate to={authenticated ? '/dashboard' : '/login'} replace />}
+                />
               </Routes>
             </Suspense>
           </BrowserRouter>

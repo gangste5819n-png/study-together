@@ -6,7 +6,7 @@ import rateLimit from 'express-rate-limit';
  */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100, // 100 attempts per 15 mins prevents brute force while accommodating campus NATs
+  max: process.env.NODE_ENV === 'development' ? 5000 : 100,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -40,7 +40,7 @@ export const schedulerTriggerLimiter = rateLimit({
  */
 export const generalApiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 300,
+  max: process.env.NODE_ENV === 'development' ? 10000 : 300,
   standardHeaders: true,
   legacyHeaders: false,
   message: {

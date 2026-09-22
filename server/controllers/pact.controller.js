@@ -284,12 +284,26 @@ export const addCommitment = async (req, res, next) => {
       });
     }
 
-    const { title, category, ownerId, estimatedMinutes, mandatory } = req.body;
+    const { title, category, ownerId, estimatedMinutes, mandatory, assignedTo } = req.body;
+
+    // Derive ownerId safely:
+    // If assigned to partner, verify partner exists in connection:
+    let resolvedOwnerId = userId;
+    if (ownerId && ownerId !== 'me' && typeof ownerId === 'string' && ownerId.length === 24) {
+      if (connection.user1.equals(ownerId) || connection.user2?.equals(ownerId)) {
+        resolvedOwnerId = ownerId;
+      }
+    } else if (assignedTo === 'partner') {
+      const partnerId = connection.user1.equals(userId) ? connection.user2 : connection.user1;
+      if (partnerId) {
+        resolvedOwnerId = partnerId;
+      }
+    }
 
     const newCommitment = {
       title,
       category: category || 'CDS',
-      ownerId: ownerId || userId,
+      ownerId: resolvedOwnerId,
       createdBy: userId,
       estimatedMinutes: Number(estimatedMinutes) || 45,
       date: pact.date,

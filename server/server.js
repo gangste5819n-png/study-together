@@ -35,16 +35,14 @@ app.use(
   })
 );
 
-// Allowed origins for CORS
-const allowedOrigins = config.isProduction
-  ? [...config.clientOrigins]
-  : [
-      ...config.clientOrigins,
-      config.clientOrigin,
-      'http://localhost:5173',
-      'http://127.0.0.1:5173',
-      'http://localhost:3000',
-    ];
+// Allowed origins for CORS (normalized without trailing slashes)
+const allowedOrigins = [
+  ...config.clientOrigins,
+  config.clientOrigin.replace(/\/+$/, ''),
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:3000',
+];
 
 // Configure production-hardened CORS
 app.use(
@@ -52,7 +50,8 @@ app.use(
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps, curl, or Postman)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
+      const normalizedOrigin = origin.replace(/\/+$/, '');
+      if (allowedOrigins.some((allowed) => allowed === normalizedOrigin)) {
         return callback(null, true);
       }
       if (config.isProduction) {

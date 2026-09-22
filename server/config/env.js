@@ -5,7 +5,10 @@ dotenv.config();
 
 export const getClientOrigins = () => {
   const originStr = process.env.CLIENT_URL || process.env.CLIENT_ORIGIN || 'http://localhost:5173';
-  return originStr.split(',').map((o) => o.trim()).filter(Boolean);
+  return originStr
+    .split(',')
+    .map((o) => o.trim().replace(/\/+$/, ''))
+    .filter(Boolean);
 };
 
 export const config = {

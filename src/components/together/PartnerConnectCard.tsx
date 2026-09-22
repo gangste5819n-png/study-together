@@ -5,7 +5,6 @@ import { useStudy } from '../../context/StudyContext';
 
 export const PartnerConnectCard: React.FC = () => {
   const {
-    partner,
     partnerInfo,
     createPartnerInvite,
     joinPartnerInvite,
@@ -17,8 +16,8 @@ export const PartnerConnectCard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const isConnected = Boolean(partnerInfo?.connected || partner.name !== 'Priya Sharma');
-  const roomCode = partnerInfo?.roomCode || 'STUDY-CMQK';
+  const isConnected = Boolean(partnerInfo?.connected);
+  const roomCode = partnerInfo?.roomCode || '';
 
   const handleCopy = () => {
     navigator.clipboard.writeText(roomCode);

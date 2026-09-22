@@ -135,3 +135,60 @@ export const getMe = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * Update current authenticated user profile / settings
+ * PATCH /api/auth/me
+ */
+export const updateMe = async (req, res, next) => {
+  try {
+    if (!dbStatus.connected) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database service is currently unavailable.',
+      });
+    }
+
+    const { name, examGoal, targetStudyMinutes, statusMessage, avatar, timezone } = req.body;
+
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User profile not found.',
+      });
+    }
+
+    if (name && typeof name === 'string' && name.trim().length >= 2) {
+      user.name = name.trim();
+    }
+    if (examGoal !== undefined && typeof examGoal === 'string') {
+      user.examGoal = examGoal.trim();
+    }
+    if (targetStudyMinutes !== undefined) {
+      const mins = Number(targetStudyMinutes);
+      if (!isNaN(mins) && mins >= 0) {
+        user.targetStudyMinutes = mins;
+      }
+    }
+    if (statusMessage !== undefined && typeof statusMessage === 'string') {
+      user.statusMessage = statusMessage.trim();
+    }
+    if (avatar && typeof avatar === 'string') {
+      user.avatar = avatar.trim();
+    }
+    if (timezone && typeof timezone === 'string') {
+      user.timezone = timezone.trim();
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: user.toJSON(),
+    });
+  } catch (error) {
+    next(error);
+  }
+};

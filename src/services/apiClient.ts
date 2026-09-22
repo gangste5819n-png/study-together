@@ -167,6 +167,19 @@ export const apiClient = {
       return request<{ user: BackendUser }>('/auth/me', { method: 'GET' });
     },
 
+    updateProfile: async (payload: {
+      name?: string;
+      examGoal?: string;
+      targetStudyMinutes?: number;
+      statusMessage?: string;
+      avatar?: string;
+    }) => {
+      return request<{ user: BackendUser; message?: string }>('/auth/me', {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+      });
+    },
+
     logout: () => {
       clearAuthToken();
     },
